@@ -114,7 +114,12 @@
     </div>
 
     @push('scripts')
+        <!-- Quill Editor -->
         <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+        <!-- SweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const toolbarOptions = [
@@ -141,6 +146,19 @@
                 });
             });
         </script>
+
+        @if(session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: "{{ session('success') }}",
+                    confirmButtonColor: '#3085d6',
+                });
+            });
+        </script>
+    @endif
     @endpush
 
 </x-app-layout>
