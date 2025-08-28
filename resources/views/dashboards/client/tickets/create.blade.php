@@ -67,6 +67,30 @@
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Enter ticket title">
                     </div>
+
+                    <!-- Project Field -->
+                    <div>
+                        <label for="project_id" class="block text-sm font-medium text-gray-700 mb-1">Project</label>
+                        <select id="project_id" name="project_id"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">-- Select Project --</option>
+                            @foreach ($projects as $project)
+                                <option value="{{ $project->id }}" {{ old('project_id') == $project->id ? 'selected' : '' }}>
+                                    {{ $project->name }}
+                                </option>
+                                
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="developer_id" class="block font-medium">Assign to Developer</label>
+                        <select name="developer_id" id="developer_id" class="border rounded w-full p-2">
+                            <option value="">-- Pilih Developer --</option>
+                            @foreach($developers as $developer)
+                                <option value="{{ $developer->id }}">{{ $developer->full_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Description Field (Quill Editor) -->
@@ -89,7 +113,9 @@
                             Choose File
                         </label>
                         <span class="ml-2 text-sm text-gray-500" id="file-name">No file chosen</span>
-                        <input id="attachment" name="attachment" type="file" class="sr-only"
+                        <input id="attachment" name="attachment" type="file"
+                            accept=".pdf,.png,.jpg,.jpeg"
+                            class="sr-only"
                             onchange="document.getElementById('file-name').textContent = this.files[0] ? this.files[0].name : 'No file chosen'">
                     </div>
                 </div>
@@ -158,7 +184,6 @@
                 });
             });
         </script>
-    @endif
+        @endif
     @endpush
-
 </x-app-layout>

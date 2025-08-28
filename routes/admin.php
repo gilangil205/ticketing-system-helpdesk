@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Middleware\RoleMiddleware;
+use App\Http\Controllers\TicketController;
 
 Route::middleware([
     'auth',
@@ -17,8 +18,13 @@ Route::middleware([
     // Management Pegawai
     Route::resource('employees', EmployeeController::class);
 
-    // Halaman project (hanya tampilan)
-    Route::get('/projects', function () {
-        return view('projects.index');
-    })->name('projects');
+    // Halaman project
+    Route::get('/projects', [TicketController::class, 'projectTickets'])->name('projects');
+
+    // Tickets
+    Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
+    Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
+    Route::put('/tickets/{ticket}', [TicketController::class, 'update'])->name('tickets.update');
+    Route::delete('/tickets/{ticket}', [TicketController::class, 'destroy'])->name('tickets.destroy');
 });
+

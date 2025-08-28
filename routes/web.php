@@ -19,12 +19,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
    Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
 
-Route::middleware(['auth', 'role:Admin,Project Manager'])->group(function () {
-    Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
-    Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
-    Route::delete('/tickets/{ticket}', [TicketController::class, 'destroy'])->name('tickets.destroy');
-});
-
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

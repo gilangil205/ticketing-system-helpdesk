@@ -4,13 +4,162 @@ namespace App\Http\Controllers;
 
 use App\Models\Ticket;
 use App\Models\User;
+use App\Models\Project;
+use App\Models\TicketHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use App\Mail\TicketCreated;
 
 class TicketController extends Controller
 {
+    /**
+     * ======================================================
+     *                BAGIAN UNTUK ADMIN & PROJECT MANAGER
+     * ======================================================
+     */
+
+    // List semua tiket (admin/PM)
+    public function index(Request $request)
+    {
+        $query = Ticket::with(['project', 'developer']);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                  ->orWhere('name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%');
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('priority')) {
+            $query->where('priority', $request->priority);
+        }
+
+        if ($request->filled('project_id')) {
+            $query->where('project_id', $request->project_id);
+        }
+
+        $tickets = $query->orderBy('created_at', 'desc')->paginate(10);
+        $projects = Project::all();
+
+        return view('tickets.index', compact('tickets', 'projects'));
+    }
+
+    // Detail tiket Admin/PM
+    public function show(Ticket $ticket)
+    {
+        if (Auth::user()->role === 'Developer' && $ticket->developer_id !== Auth::id()) {
+            abort(403, 'Anda tidak memiliki akses ke tiket ini.');
+        }
+
+        return view('tickets.show', compact('ticket'));
+    }
+
+    // Update tiket
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'sometimes|required|string',
+            'priority' => 'sometimes|required|in:Low,Medium,High,Critical',
+        ]);
+
+        $ticket = Ticket::findOrFail($id);
+
+        if (Auth::user()->role === 'Developer') {
+            if ($ticket->developer_id !== Auth::id()) {
+                abort(403, 'Anda tidak memiliki akses untuk memperbarui tiket ini.');
+            }
+            if ($request->has('status')) {
+                $ticket->status = $request->status;
+            }
+        } else {
+            if ($request->has('status')) {
+                $ticket->status = $request->status;
+            }
+            if ($request->has('priority')) {
+                $ticket->priority = $request->priority;
+            }
+        }
+
+        $ticket->save();
+
+        TicketHistory::create([
+            'ticket_id' => $ticket->id,
+            'user_id' => Auth::id(),
+            'action' => 'Updated',
+            'description' => 'Ticket updated: Status = ' . $ticket->status . ', Priority = ' . $ticket->priority,
+        ]);
+
+        return back()->with('success', 'Tiket berhasil diperbarui.');
+    }
+
+    // Hapus tiket
+    public function destroy(Request $request, $id)
+    {
+        $ticket = Ticket::findOrFail($id);
+
+        if ($ticket->attachment && Storage::disk('public')->exists($ticket->attachment)) {
+            Storage::disk('public')->delete($ticket->attachment);
+        }
+
+        TicketHistory::create([
+            'ticket_id' => $ticket->id,
+            'user_id' => Auth::id(),
+            'action' => 'Deleted',
+            'description' => 'Ticket "' . $ticket->title . '" has been deleted.',
+        ]);
+
+        $ticket->delete();
+
+        return redirect()->route('tickets.index')
+                         ->with('success', 'Tiket berhasil dihapus.');
+    }
+
+    // Tampilan semua project beserta tiketnya
+    public function projectTickets(Request $request)
+    {
+        $projects = Project::with(['tickets' => function ($query) {
+            $query->orderBy('created_at', 'desc');
+        }])->get();
+
+        return view('dashboards.admin.projects.index', compact('projects'));
+    }
+
+    /**
+     * ======================================================
+     *                BAGIAN UNTUK CLIENT
+     * ======================================================
+     */
+
+    // Dashboard Client
+    public function clientDashboard()
+    {
+        $userEmail = Auth::user()->email;
+
+        $openCount = Ticket::where('status', 'Open')->where('email', $userEmail)->count();
+        $inProgressCount = Ticket::where('status', 'In Progress')->where('email', $userEmail)->count();
+        $closedCount = Ticket::where('status', 'Closed')->where('email', $userEmail)->count();
+
+        return view('dashboards.client.index', compact('openCount', 'inProgressCount', 'closedCount'));
+    }
+
+    // Halaman buat tiket baru (Client)
+    public function create()
+    {
+        $projects = Project::all();
+        $developers = User::where('role', 'Developer')->get();
+
+        return view('dashboards.client.tickets.create', compact('projects', 'developers'));
+    }
+
+    // Simpan tiket baru (Client)
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -19,47 +168,95 @@ class TicketController extends Controller
             'topic' => 'required',
             'title' => 'required',
             'description' => 'required',
-            'attachment' => 'nullable|file|max:2048',
+            'attachment' => 'nullable|mimes:pdf,png,jpg,jpeg|max:2048',
+            'project_id' => 'nullable|exists:projects,id',
+            'developer_id' => 'nullable|exists:users,id',
         ]);
 
-        if ($request->hasFile('attachment')) {
-            // Simpan file ke disk 'public'
-           $data['attachment'] = $request->file('attachment')->store('attachments', 'public');
+        $data['priority'] = 'Low';
+        $data['ticket_number'] = 'TK-' . strtoupper(uniqid());
 
+        if ($request->hasFile('attachment')) {
+            $data['attachment'] = $request->file('attachment')->store('attachments', 'public');
         }
 
         $ticket = Ticket::create($data);
 
-        // Kirim email ke pengirim, Project Manager, dan Developer
+        TicketHistory::create([
+            'ticket_id' => $ticket->id,
+            'user_id' => Auth::id(),
+            'action' => 'Created',
+            'description' => 'Ticket created with title: ' . $ticket->title,
+        ]);
+
         $recipients = [$data['email']];
         $pmEmails = User::where('role', 'Project Manager')->pluck('email')->toArray();
-        $devEmails = User::where('role', 'Developer')->pluck('email')->toArray();
-        $recipients = array_merge($recipients, $pmEmails, $devEmails);
+        $recipients = array_merge($recipients, $pmEmails);
+
+        if (!empty($data['developer_id'])) {
+            $developer = User::find($data['developer_id']);
+            if ($developer) $recipients[] = $developer->email;
+        }
 
         foreach ($recipients as $recipient) {
             Mail::to($recipient)->send(new TicketCreated($data));
         }
 
-        return redirect()->back()->with('success', 'Tiket berhasil dibuat dan email telah dikirim.');
+        return redirect()->route('client.tickets.create')
+                         ->with('success', 'Tiket berhasil dibuat dan email telah dikirim.');
     }
 
-    public function index()
+    // Detail tiket Client berdasarkan ticket_number
+    public function showClientTicket($ticket_number)
     {
-        $tickets = Ticket::latest()->get();
-        return view('tickets.index', compact('tickets'));
+        $ticket = Ticket::where('ticket_number', $ticket_number)
+                        ->where('email', Auth::user()->email)
+                        ->firstOrFail();
+
+        $history = TicketHistory::where('ticket_id', $ticket->id)
+                    ->with('user')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+
+        return view('dashboards.client.tickets.show', compact('ticket', 'history'));
     }
 
-    public function show($id)
+    // History tiket milik client yang sedang login
+    public function history()
     {
-        $ticket = Ticket::findOrFail($id);
-        return view('tickets.show', compact('ticket'));
+        $userEmail = Auth::user()->email;
+
+        $tickets = Ticket::with(['project'])
+            ->where('email', $userEmail)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return view('dashboards.client.history', compact('tickets'));
     }
 
-    public function destroy($id)
-    {
-        $ticket = Ticket::findOrFail($id);
-        $ticket->delete();
+    /**
+     * ======================================================
+     *                BAGIAN UNTUK DEVELOPER
+     * ======================================================
+     */
 
-        return redirect()->route('tickets.index')->with('success', 'Tiket berhasil dihapus.');
+    public function developerTickets(Request $request)
+    {
+        $developerId = Auth::id();
+
+        $query = Ticket::with(['project', 'developer'])
+            ->where('developer_id', $developerId);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('priority')) {
+            $query->where('priority', $request->priority);
+        }
+
+        $tickets = $query->orderBy('created_at', 'desc')->paginate(10);
+
+        return view('dashboards.developer.tickets.index', compact('tickets'));
     }
 }

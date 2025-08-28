@@ -1,90 +1,63 @@
 <x-app-layout>
     <x-slot name="header">
-        @section('title', 'Client Management')
-        <h2 class="text-xl font-semibold text-gray-800 leading-tight">
+        @section('title', 'Clients Management')
+        <h2 class="text-lg font-semibold text-gray-800 leading-tight">
             {{ __('Client Management') }}
         </h2>
     </x-slot>
 
     <div class="py-4">
-        <div class="mx-auto ">
-            <!-- Search and Filter Bar -->
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-                <form method="GET" action="{{ route('clients.index') }}" class="w-full sm:w-auto">
-                    <div class="flex flex-col sm:flex-row gap-2">
-                        <!-- Search Input -->
-                        <div class="relative flex-grow">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                </svg>
-                            </div>
-                            <input 
-                                type="text" 
-                                name="search" 
-                                placeholder="Search clients..." 
-                                value="{{ request('search') }}"
-                                class="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            >
+        <div class="mx-auto">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
+                <form method="GET" action="{{ route('clients.index') }}" class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
+                    <div class="relative w-full sm:w-48">
+                        <input type="text" name="search" placeholder="Search clients..." 
+                               value="{{ request('search') }}"
+                               class="border border-gray-300 rounded-lg pl-8 pr-3 py-1.5 text-sm w-full focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                        <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
                         </div>
-                        
-                        <!-- Status Filter -->
-                        <div class="flex-shrink-0">
-                            <select 
-                                name="filter"
-                                class="block w-full px-3 py-2 pr-8 border border-gray-300 rounded-lg text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                                onchange="this.form.submit()"
-                            >
-                                <option value="">All Status</option>
-                                <option value="Active" {{ request('filter') === 'Active' ? 'selected' : '' }}>Active</option>
-                                <option value="Inactive" {{ request('filter') === 'Inactive' ? 'selected' : '' }}>Inactive</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Clear Filters -->
-                        @if(request('search') || request('filter'))
-                        <div class="flex-shrink-0">
-                            <a 
-                                href="{{ route('clients.index') }}" 
-                                class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            >
-                                <svg class="h-4 w-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                                Clear
-                            </a>
-                        </div>
-                        @endif
                     </div>
+                    
+                    <select name="filter" class="border border-gray-300 rounded-lg pr-8  px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-auto bg-white"
+                            onchange="this.form.submit()">
+                        <option value="">All Status</option>
+                        <option value="Active" {{ request('filter') === 'Active' ? 'selected' : '' }}>Active</option>
+                        <option value="Inactive" {{ request('filter') === 'Inactive' ? 'selected' : '' }}>Inactive</option>
+                    </select>
+                    
+                    @if(request('search') || request('filter'))
+                    <a href="{{ route('clients.index') }}" class="text-sm text-gray-500 hover:text-gray-700 flex items-center">
+                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Clear
+                    </a>
+                    @endif
                 </form>
                 
-                <!-- Add Client Button -->
-                <div class="w-full sm:w-auto">
-                    <a 
-                        href="{{ route('clients.create') }}" 
-                        class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                        <svg class="-ml-1 mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path>
-                        </svg>
-                        Add Client
-                    </a>
-                </div>
+                <a href="{{ route('clients.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg flex items-center text-sm w-full sm:w-auto justify-center transition duration-150 ease-in-out">
+                    <svg class="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    Add Client
+                </a>
             </div>
 
-            <!-- Clients Table -->
             <div class="bg-white shadow rounded-lg overflow-hidden border border-gray-200">
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto w-full">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Contact</th>
-                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Address</th>
-                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Created</th>
-                                <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Contact</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Address</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Created</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -93,31 +66,31 @@
                                 <td class="px-4 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
                                         @if($client->picture)
-                                        <div class="flex-shrink-0 h-8 w-8">
-                                            <img class="h-8 w-8 rounded-full object-cover" src="{{ asset('storage/'.$client->picture) }}" alt="{{ $client->username }}">
+                                        <div class="flex-shrink-0 h-10 w-10">
+                                            <img class="h-10 w-10 rounded-full object-cover" src="{{ asset('storage/'.$client->picture) }}" alt="{{ $client->username }}">
                                         </div>
                                         @else
-                                        <div class="flex-shrink-0 h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                            <span class="text-blue-600 text-xs font-medium">{{ substr($client->username, 0, 1) }}</span>
+                                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                            <span class="text-blue-600 text-sm font-medium">{{ substr($client->username, 0, 1) }}</span>
                                         </div>
                                         @endif
-                                        <div class="ml-3">
+                                        <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900">{{ $client->username }}</div>
                                             <div class="text-xs text-gray-500 sm:hidden">{{ $client->email }}</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-4 py-4 whitespace-nowrap hidden sm:table-cell">
+                                <td class="px-4 py-4 hidden sm:table-cell">
                                     <div class="text-sm text-gray-900">{{ $client->full_name }}</div>
                                     <div class="text-xs text-gray-500">{{ $client->email }}</div>
                                 </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell truncate max-w-[160px]">
+                                <td class="px-4 py-4 hidden md:table-cell text-sm text-gray-500">
                                     {{ $client->alamat }}
                                 </td>
                                 <td class="px-4 py-4 whitespace-nowrap">
                                     <form action="{{ route('clients.toggle-status', $client) }}" method="POST">
                                         @csrf
-                                        <button type="submit" class="px-2 py-1 text-xs rounded-full font-medium 
+                                        <button type="submit" class="px-2 py-1 text-xs font-semibold rounded-full 
                                             {{ $client->status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                             {{ $client->status }}
                                         </button>
@@ -126,7 +99,7 @@
                                 <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ $client->nohp }}
                                 </td>
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 hidden lg:table-cell">
+                                <td class="px-4 py-4 hidden lg:table-cell text-sm text-gray-500">
                                     {{ $client->created_at->format('d M Y') }}
                                 </td>
                                 <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -164,8 +137,6 @@
                         </tbody>
                     </table>
                 </div>
-                
-                <!-- Pagination -->
                 <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
                     {{ $clients->appends(request()->query())->links() }}
                 </div>
@@ -186,10 +157,10 @@
                     text: "This action cannot be undone!",
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#e3342f',
-                    cancelButtonColor: '#6c757d',
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
                     confirmButtonText: 'Yes, delete it!',
-                    reverseButtons: true
+                    cancelButtonText: 'Cancel'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         form.submit();

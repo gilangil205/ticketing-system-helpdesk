@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        @section('title', 'Management Employees')
+        @section('title', 'Employees management')
         <h2 class="text-lg font-semibold text-gray-800 leading-tight">
             {{ __('Management Employees') }}
         </h2>

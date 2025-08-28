@@ -1,199 +1,244 @@
 <x-app-layout>
     <x-slot name="header">
         @section('title', 'Ticket Management')
-        <div class="flex justify-between items-center">
-            <h2 class="text-2xl font-bold text-gray-800">Ticket Management</h2>
-            <div class="flex space-x-2">
-                <x-primary-button>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                    </svg>
-                    New Ticket
-                </x-primary-button>
-                <x-secondary-button>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
-                    Export
-                </x-secondary-button>
-            </div>
-        </div>
     </x-slot>
 
     <div class="py-4">
         <div class="mx-auto">
             <!-- Filters -->
-            <div class="bg-white rounded-lg shadow-sm mb-6 p-4">
-                <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="bg-white rounded-lg shadow-sm mb-4 p-4 border border-gray-200">
+                <div class="flex flex-col md:flex-row gap-4 items-start md:items-center">
                     <div class="relative w-full md:w-64">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
-                            </svg>
-                        </div>
-                        <input type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Search tickets...">
+                        <form method="GET" action="{{ route('tickets.index') }}" class="w-full">
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <input type="text" name="search" value="{{ request('search') }}" 
+                                       class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" 
+                                       placeholder="Search tickets...">
+                            </div>
+                        </form>
                     </div>
                     
-                    <div class="flex flex-wrap gap-3">
-                        <select class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm">
+                    <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                        <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
                             <option>All Topics</option>
                             <option>Technical Support</option>
                             <option>Billing</option>
                             <option>Account</option>
                         </select>
                         
-                        <select class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm">
-                            <option>All Status</option>
-                            <option>Open</option>
-                            <option>Pending</option>
-                            <option>Resolved</option>
-                        </select>
-                        
-                        <select class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm">
-                            <option>Sort by: Newest</option>
-                            <option>Sort by: Oldest</option>
-                            <option>Sort by: Priority</option>
-                        </select>
+                        <form method="GET" action="{{ route('tickets.index') }}" class="w-full sm:w-auto">
+                            <select name="status" onchange="this.form.submit()" 
+                                    class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">All Status</option>
+                                <option value="In Progress" {{ request('status') == 'In Progress' ? 'selected' : '' }}>In Progress</option>
+                                <option value="Wait in Progress" {{ request('status') == 'Wait in Progress' ? 'selected' : '' }}>Wait in Progress</option>
+                                <option value="pass Test" {{ request('status') == 'pass Test' ? 'selected' : '' }}>pass Test</option>
+                                <option value="Closed" {{ request('status') == 'Closed' ? 'selected' : '' }}>Closed</option>
+                            </select>
+                        </form>
+
+                        <form method="GET" action="{{ route('tickets.index') }}" class="w-full sm:w-auto">
+                            <select name="priority" onchange="this.form.submit()"
+                                    class="border border-gray-300 pr-8 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">All Priorities</option>
+                                <option value="Low" {{ request('priority') == 'Low' ? 'selected' : '' }}>Low</option>
+                                <option value="Medium" {{ request('priority') == 'Medium' ? 'selected' : '' }}>Medium</option>
+                                <option value="High" {{ request('priority') == 'High' ? 'selected' : '' }}>High</option>
+                                <option value="Critical" {{ request('priority') == 'Critical' ? 'selected' : '' }}>Critical</option>
+                            </select>
+                        </form>
                     </div>
                 </div>
             </div>
 
             <!-- Tickets Table -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white shadow rounded-lg overflow-hidden border border-gray-200">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Topic</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requester</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($tickets as $ticket)
-                            <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2m5-5a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
+                    <div class="inline-block min-w-full align-middle">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <colgroup>
+                                <col style="width: 25%">
+                                <col style="width: 15%">
+                                <col style="width: 15%">
+                                <col style="width: 10%">
+                                <col style="width: 10%">
+                                <col style="width: 15%">
+                                <col style="width: 10%">
+                            </colgroup>
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requester</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Topic</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Ticket #</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Created</th>
+                                    <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($tickets as $ticket)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-4">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-8 w-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2m5-5a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </div>
+                                            <div class="ml-3">
+                                               <div class="text-sm text-gray-900 truncate">{{ $ticket->name }}</div>
+                                                <div class="text-xs text-gray-500 truncate">{{ $ticket->email }}</div>
+                                                <div class="text-xs text-gray-500 sm:hidden">#{{ $ticket->id }}</div>
+                                            </div>
                                         </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900">{{ $ticket->title }}</div>
-                                            <div class="text-sm text-gray-500">#{{ $ticket->id }}</div>
+                                    </td>
+                                    <td class="px-4 py-4 hidden sm:table-cell">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                            {{ $ticket->topic === 'Technical' ? 'bg-blue-100 text-blue-800' : '' }}
+                                            {{ $ticket->topic === 'Billing' ? 'bg-purple-100 text-purple-800' : '' }}
+                                            {{ $ticket->topic === 'Account' ? 'bg-green-100 text-green-800' : '' }}">
+                                            {{ $ticket->topic }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 hidden md:table-cell">
+                                        <div class="text-sm font-semibold text-gray-900 truncate">{{ $ticket->ticket_number ?? '-' }}</div>
+                                    </td>
+
+                                    <td class="px-4 py-4">
+                                        <form action="{{ route('tickets.update', $ticket->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('PUT')
+                                            <select name="priority" onchange="this.form.submit()" 
+                                                    class="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500
+                                                        {{ $ticket->priority === 'Low' ? 'bg-gray-100 text-gray-800' : '' }}
+                                                        {{ $ticket->priority === 'Medium' ? 'bg-blue-100 text-blue-800' : '' }}
+                                                        {{ $ticket->priority === 'High' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                                        {{ $ticket->priority === 'Critical' ? 'bg-red-100 text-red-800' : '' }}">
+                                                <option value="Low" {{ $ticket->priority === 'Low' ? 'selected' : '' }}>Low</option>
+                                                <option value="Medium" {{ $ticket->priority === 'Medium' ? 'selected' : '' }}>Medium</option>
+                                                <option value="High" {{ $ticket->priority === 'High' ? 'selected' : '' }}>High</option>
+                                                <option value="Critical" {{ $ticket->priority === 'Critical' ? 'selected' : '' }}>Critical</option>
+                                            </select>
+                                        </form>
+                                    </td>
+                                    <td class="px-4 py-4">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                            {{ $ticket->status === 'Open' ? 'bg-red-100 text-red-800' : '' }}
+                                            {{ $ticket->status === 'In Progress' ? 'bg-blue-100 text-blue-800' : '' }}
+                                            {{ $ticket->status === 'Wait in Progress' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                            {{ $ticket->status === 'Pass Test' ? 'bg-purple-100 text-purple-800' : '' }}
+                                            {{ $ticket->status === 'Closed' ? 'bg-green-100 text-green-800' : '' }}
+                                            {{ $ticket->status === 'Pending' ? 'bg-orange-100 text-orange-800' : '' }}">
+                                            {{ $ticket->status ?? 'Open' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 text-sm text-gray-500 hidden lg:table-cell">
+                                        <div class="truncate">{{ $ticket->created_at->format('d M Y') }}</div>
+                                        <span class="text-xs text-gray-400 truncate">{{ $ticket->created_at->format('H:i') }}</span>
+                                    </td>
+                                    <td class="px-4 py-4 text-right text-sm font-medium">
+                                        <div class="flex justify-end space-x-2">
+                                           <a href="{{ route('tickets.show', $ticket) }}" class="text-blue-600 hover:text-blue-900 p-1" title="View">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                </svg>
+                                            </a>
+
+                                            <form action="{{ route('tickets.destroy', $ticket->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="button" class="text-red-600 hover:text-red-900 p-1 delete-confirm" title="Delete">
+                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                </button>
+                                            </form>
+
+                                            <form action="{{ route('tickets.update', $ticket->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('PUT')
+                                                <select name="status" onchange="this.form.submit()" 
+                                                        class="text-xs border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                                                    <option value="Open" {{ $ticket->status === 'Open' ? 'selected' : '' }}>Open</option>
+                                                    <option value="In Progress" {{ $ticket->status === 'In Progress' ? 'selected' : '' }}>In Progress</option>
+                                                    <option value="Wait in Progress" {{ $ticket->status === 'Wait in Progress' ? 'selected' : '' }}>Wait</option>
+                                                    <option value="Pass Test" {{ $ticket->status === 'Pass Test' ? 'selected' : '' }}>Pass Test</option>
+                                                    <option value="Closed" {{ $ticket->status === 'Closed' ? 'selected' : '' }}>Closed</option>
+                                                </select>
+                                            </form>
                                         </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                        {{ $ticket->topic === 'Technical' ? 'bg-blue-100 text-blue-800' : '' }}
-                                        {{ $ticket->topic === 'Billing' ? 'bg-purple-100 text-purple-800' : '' }}
-                                        {{ $ticket->topic === 'Account' ? 'bg-green-100 text-green-800' : '' }}">
-                                        {{ $ticket->topic }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ $ticket->name }}</div>
-                                    <div class="text-sm text-gray-500">{{ $ticket->email }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                        {{ $ticket->status === 'Open' ? 'bg-red-100 text-red-800' : '' }}
-                                        {{ $ticket->status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : '' }}
-                                        {{ $ticket->status === 'Resolved' ? 'bg-green-100 text-green-800' : '' }}">
-                                        {{ $ticket->status ?? 'Open' }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ $ticket->created_at->format('d M Y') }}<br>
-                                    <span class="text-gray-400">{{ $ticket->created_at->format('H:i') }}</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="flex justify-end space-x-2">
-                                    {{-- Tombol Lihat --}}
-                                    <a href="{{ route('tickets.show', $ticket->id) }}" 
-                                    class="text-gray-600 hover:text-blue-600" 
-                                    title="Lihat Tiket">
-                                        <svg xmlns="http://www.w3.org/2000/svg" 
-                                            class="h-5 w-5" viewBox="0 0 20 20" 
-                                            fill="currentColor">
-                                            <path fill-rule="evenodd" 
-                                                d="M10 2C5 2 1.73 7.11 1.05 8.17a1 1 0 000 .66C1.73 10.89 5 16 10 16s8.27-5.11 8.95-6.17a1 1 0 000-.66C18.27 7.11 15 2 10 2zM10 14c-2.64 0-4.77-2.49-5.73-4C5.23 8.49 7.36 6 10 6s4.77 2.49 5.73 4c-.96 1.51-3.09 4-5.73 4zM10 8a2 2 0 100 4 2 2 0 000-4z" 
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                    </a>
-
-                                    {{-- Tombol Hapus --}}
-                                    <form action="{{ route('tickets.destroy', $ticket->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus tiket ini?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                class="text-red-600 hover:text-red-800" 
-                                                title="Hapus Tiket">
-                                            <svg xmlns="http://www.w3.org/2000/svg" 
-                                                class="h-5 w-5" viewBox="0 0 20 20" 
-                                                fill="currentColor">
-                                                <path fill-rule="evenodd" 
-                                                    d="M6 2a1 1 0 00-1 1v1H3a1 1 0 000 2h.293l.854 12.708A2 2 0 006.142 20h7.716a2 2 0 001.995-1.292L16.707 6H17a1 1 0 000-2h-2V3a1 1 0 00-1-1H6zm2 4a1 1 0 112 0v9a1 1 0 11-2 0V6zm4 0a1 1 0 112 0v9a1 1 0 11-2 0V6z" 
-                                                    clip-rule="evenodd" />
-                                            </svg>
-                                        </button>
-                                    </form>
-                                </div>
-
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 
                 <!-- Pagination -->
-                <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                        <div>
-                            <p class="text-sm text-gray-700">
-                                Showing
-                                <span class="font-medium">1</span>
-                                to
-                                <span class="font-medium">10</span>
-                                of
-                                <span class="font-medium">20</span>
-                                results
-                            </p>
-                        </div>
-                        <div>
-                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                    <span class="sr-only">Previous</span>
-                                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-                                    </svg>
-                                </a>
-                                <a href="#" aria-current="page" class="z-10 bg-indigo-50 border-indigo-500 text-indigo-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                    1
-                                </a>
-                                <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                    2
-                                </a>
-                                <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                    3
-                                </a>
-                                <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                    <span class="sr-only">Next</span>
-                                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                                    </svg>
-                                </a>
-                            </nav>
-                        </div>
-                    </div>
+                <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+                    {{ $tickets->appends(request()->query())->links() }}
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const deleteButtons = document.querySelectorAll('.delete-confirm');
+
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const form = this.closest('form');
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "This action cannot be undone!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+    </script>
+
+    @if(session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: "{{ session('success') }}",
+                    confirmButtonColor: '#3085d6',
+                });
+            });
+        </script>
+    @endif
 </x-app-layout>
+
+<style>
+@media screen and (max-width: 768px) {
+    table {
+        font-size: 0.875rem;
+    }
+    td, th {
+        padding: 0.5rem;
+    }
+}
+</style>

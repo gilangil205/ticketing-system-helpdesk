@@ -2,38 +2,31 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\RoleMiddleware;
+use App\Http\Controllers\TicketController;
 
 Route::middleware(['auth', RoleMiddleware::class . ':Client'])->group(function () {
-    // Dashboard route
+
+    // Dashboard
     Route::get('/client/dashboard', function () {
-        return view('dashboards.client.index'); // Sesuai struktur folder Anda
+        return view('dashboards.client.index'); 
     })->name('client.dashboard');
-    
-    // Tickets routes group
+
+    // Tickets
     Route::prefix('client/tickets')->name('client.tickets.')->group(function () {
-        // Index route
+        // Redirect ke create
         Route::get('/', function () {
-            return view('dashboards.client.tickets.index'); // Asumsi file ada di dashboards/client/tickets.blade.php
+            return redirect()->route('client.tickets.create'); 
         })->name('index');
-        
-        // Create route
-        Route::get('/create', function () {
-            return view('dashboards.client.tickets-create');
-        })->name('create');
-        
-        // Store route
-        Route::post('/', function () {
-            // Logic untuk menyimpan ticket
-        })->name('store');
-        
-        // Add other ticket routes as needed
+
+        // Form create + store
+        Route::get('/create', [TicketController::class, 'create'])->name('create');
+        Route::post('/', [TicketController::class, 'store'])->name('store');
+
+        // History
+        Route::get('/history', [TicketController::class, 'history'])->name('history');
+
+        // Show ticket berdasarkan ticket_number
+        Route::get('/{ticket_number}', [TicketController::class, 'showClientTicket'])
+            ->name('show');
     });
-
-    // History route
-    Route::get('/client/history', function () {
-        return view('dashboards.client.history'); // Make sure this view exists
-    })->name('client.history.index');
-
-
-    
 });

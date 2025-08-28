@@ -1,159 +1,86 @@
 <x-app-layout>
     <x-slot name="header">
-        @section('title', 'Ticket History')
+        @section('title', 'History Tiket')
         <h2 class="text-xl font-semibold text-gray-800">
-            {{ __('Ticket History') }}
+            {{ __('History Tiket') }}
         </h2>
     </x-slot>
 
-    <div class="py-4">
-        <div class="bg-white p-6 rounded-lg shadow">
-            <!-- Search and Filter Section -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                <!-- Search Bar -->
-                <div class="w-full md:w-1/3">
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
-                            </svg>
-                        </div>
-                        <input type="text" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Search tickets...">
+    <div class="py-6">
+        <div class="mx-auto">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+
+                @if (session('success'))
+                    <div class="mb-4 p-4 bg-green-100 text-green-700 rounded">
+                        {{ session('success') }}
                     </div>
-                </div>
-                
-                <!-- Filter Buttons -->
-                <div class="flex flex-wrap gap-2 w-full md:w-auto">
-                    <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        All
-                    </button>
-                    <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        In Progress
-                    </button>
-                    <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Not Started
-                    </button>
-                    <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Closed
-                    </button>
-                </div>
-            </div>
+                @endif
 
-            <!-- Ticket History Table -->
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Ticket</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Topic</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <!-- Row 1 -->
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">#123456</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">debro.holt@example.com</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Bug Report</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                    In Progress
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button class="text-blue-600 hover:text-blue-900 mr-3">View</button>
-                                <button class="text-gray-600 hover:text-gray-900">...</button>
-                            </td>
-                        </tr>
-                        
-                        <!-- Row 2 -->
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">#123457</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">willie.jennings@example.com</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Bug Report</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                    Not Started
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button class="text-blue-600 hover:text-blue-900 mr-3">View</button>
-                                <button class="text-gray-600 hover:text-gray-900">...</button>
-                            </td>
-                        </tr>
-                        
-                        <!-- Row 3 -->
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">3</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">#123458</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">bill.sonders@example.com</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Bug Report</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                    Pass Test
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button class="text-blue-600 hover:text-blue-900 mr-3">View</button>
-                                <button class="text-gray-600 hover:text-gray-900">...</button>
-                            </td>
-                        </tr>
-                        
-                        <!-- Row 4 -->
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">4</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">#123459</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">tim.jennings@example.com</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Bug Report</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                    Closed
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button class="text-blue-600 hover:text-blue-900 mr-3">View</button>
-                                <button class="text-gray-600 hover:text-gray-900">...</button>
-                            </td>
-                        </tr>
-                        
-                        <!-- Row 5 -->
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">5</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">#123460</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">deanna.curtis@example.com</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Bug Report</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                    In Progress
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button class="text-blue-600 hover:text-blue-900 mr-3">View</button>
-                                <button class="text-gray-600 hover:text-gray-900">...</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                @if ($tickets->isEmpty())
+                    <p class="text-gray-500 text-center py-6">Belum ada tiket yang dibuat.</p>
+                @else
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full border border-gray-200">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">#</th>
+                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Judul</th>
+                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Proyek</th>
+                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Status</th>
+                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Prioritas</th>
+                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Tanggal</th>
+                                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                @foreach ($tickets as $ticket)
+                                    <tr>
+                                        <td class="px-4 py-2 text-sm text-gray-700">
+                                            {{ ($tickets->currentPage() - 1) * $tickets->perPage() + $loop->iteration }}
+                                        </td>
+                                        <td class="px-4 py-2 text-sm text-gray-800 font-medium">
+                                            <a href="{{ route('client.tickets.show', $ticket->ticket_number) }}" class="text-blue-600 hover:underline">
+                                                {{ $ticket->title }}
+                                            </a>
+                                        </td>
+                                        <td class="px-4 py-2 text-sm text-gray-600">
+                                            {{ $ticket->project->name ?? '-' }}
+                                        </td>
+                                        <td class="px-4 py-2">
+                                            <span class="px-2 py-1 text-xs rounded-full 
+                                                @if($ticket->status === 'Open') bg-blue-100 text-blue-700
+                                                @elseif($ticket->status === 'In Progress') bg-yellow-100 text-yellow-700
+                                                @elseif($ticket->status === 'Resolved') bg-green-100 text-green-700
+                                                @else bg-gray-100 text-gray-700 @endif">
+                                                {{ $ticket->status ?? 'Unknown' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-2">
+                                            <span class="px-2 py-1 text-xs rounded-full
+                                                @if($ticket->priority === 'High') bg-red-100 text-red-700
+                                                @elseif($ticket->priority === 'Medium') bg-yellow-100 text-yellow-700
+                                                @elseif($ticket->priority === 'Low') bg-green-100 text-green-700
+                                                @else bg-gray-100 text-gray-700 @endif">
+                                                {{ $ticket->priority ?? '-' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-2 text-sm text-gray-500">
+                                            {{ $ticket->created_at->format('d M Y') }}
+                                        </td>
+                                        <td class="px-4 py-2 text-sm">
+                                            <a href="{{ route('client.tickets.show', $ticket->ticket_number) }}" class="text-blue-600 hover:underline">Detail</a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
 
-            <!-- Pagination -->
-            <div class="flex items-center justify-between mt-6">
-                <div class="text-sm text-gray-500">
-                    Showing <span class="font-medium">1</span> to <span class="font-medium">5</span> of <span class="font-medium">10</span> results
-                </div>
-                <div class="flex space-x-2">
-                    <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50" disabled>
-                        Previous
-                    </button>
-                    <button class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Next
-                    </button>
-                </div>
+                    <div class="mt-4">
+                        {{ $tickets->links() }}
+                    </div>
+                @endif
+
             </div>
         </div>
     </div>
