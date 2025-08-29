@@ -82,15 +82,6 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="mb-4">
-                        <label for="developer_id" class="block font-medium">Assign to Developer</label>
-                        <select name="developer_id" id="developer_id" class="border rounded w-full p-2">
-                            <option value="">-- Pilih Developer --</option>
-                            @foreach($developers as $developer)
-                                <option value="{{ $developer->id }}">{{ $developer->full_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
                 </div>
 
                 <!-- Description Field (Quill Editor) -->
