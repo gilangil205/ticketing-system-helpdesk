@@ -16,8 +16,8 @@
                 <div class="bg-white p-6 rounded-lg shadow">
                     <h3 class="text-lg font-semibold mb-2">Open Ticket</h3>
                     <div class="flex justify-between items-center">
-                        <span class="text-3xl font-bold">24</span>
-                        <a href="#" class="text-blue-600 hover:text-blue-800">Show more ></a>
+                        <span class="text-3xl font-bold">{{ $openTickets }}</span>
+                        <a href="{{ route('client.tickets.history') }}" class="text-blue-600 hover:text-blue-800">Show more ></a>
                     </div>
                 </div>
 
@@ -25,8 +25,8 @@
                 <div class="bg-white p-6 rounded-lg shadow">
                     <h3 class="text-lg font-semibold mb-2">Closed Ticket</h3>
                     <div class="flex justify-between items-center">
-                        <span class="text-3xl font-bold">56</span>
-                        <a href="#" class="text-blue-600 hover:text-blue-800">Show more ></a>
+                        <span class="text-3xl font-bold">{{ $closedTickets }}</span>
+                        <a href="{{ route('client.tickets.history') }}" class="text-blue-600 hover:text-blue-800">Show more ></a>
                     </div>
                 </div>
 
@@ -34,8 +34,8 @@
                 <div class="bg-white p-6 rounded-lg shadow">
                     <h3 class="text-lg font-semibold mb-2">Total Ticket</h3>
                     <div class="flex justify-between items-center">
-                        <span class="text-3xl font-bold">80</span>
-                        <a href="#" class="text-blue-600 hover:text-blue-800">Show more ></a>
+                        <span class="text-3xl font-bold">{{ $totalTickets }}</span>
+                        <a href="{{ route('client.tickets.history') }}" class="text-blue-600 hover:text-blue-800">Show more ></a>
                     </div>
                 </div>
             </div>
@@ -56,56 +56,30 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#123456</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">debra.holt@example.com</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Bug Report</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">In Progress</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">. . .</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#123456</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">willie.jennings@example.com</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Bug Report</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">In Progress</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">. . .</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">3</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#123456</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">bill.sanders@example.com</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Bug Report</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">In Progress</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">. . .</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">4</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#123456</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">tim.jennings@example.com</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Bug Report</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">In Progress</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">. . .</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">5</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#123456</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">deanna.curtis@example.com</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Bug Report</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">In Progress</span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">. . .</td>
-                            </tr>
+                            @forelse ($tickets as $ticket)
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $loop->iteration }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{{ $ticket->ticket_number }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $ticket->email }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $ticket->topic }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                            @if($ticket->status === 'Open') bg-blue-100 text-blue-700
+                                            @elseif($ticket->status === 'In Progress') bg-yellow-100 text-yellow-800
+                                            @elseif($ticket->status === 'Closed') bg-green-100 text-green-700
+                                            @else bg-gray-100 text-gray-700 @endif">
+                                            {{ $ticket->status }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <a href="{{ route('client.tickets.show', $ticket->ticket_number) }}" class="text-blue-600 hover:underline">Detail</a>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center text-gray-500 py-4">Belum ada tiket</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

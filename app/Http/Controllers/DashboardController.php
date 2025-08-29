@@ -14,19 +14,16 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        // Hanya Admin & Project Manager
+        // 🔹 Hanya untuk Admin & Project Manager
         if (in_array($user->role, ['Admin', 'Project Manager'])) {
-            // Hitung jumlah clients & employees
             $clientCount = Client::count();
             $employeeCount = User::whereIn('role', ['Developer', 'Project Manager', 'QA Master'])->count();
 
-            // 5 tiket terakhir
             $recentTickets = Ticket::select('ticket_number', 'topic', 'created_at', 'status')
                 ->orderByDesc('created_at')
                 ->limit(5)
                 ->get();
 
-            // Hitung tiket berdasarkan status
             $totalTickets = Ticket::count();
             $openTickets = Ticket::where('status', 'Open')->count();
             $inProgressTickets = Ticket::where('status', 'In Progress')->count();
@@ -35,7 +32,6 @@ class DashboardController extends Controller
             $resolvedTickets = Ticket::where('status', 'Resolved')->count();
             $closedTickets = Ticket::where('status', 'Closed')->count();
 
-            // --- Hitung Closed Tickets bulan ini & bulan lalu ---
             $closedThisMonth = Ticket::where('status', 'Closed')
                 ->whereMonth('created_at', Carbon::now()->month)
                 ->whereYear('created_at', Carbon::now()->year)
@@ -46,9 +42,8 @@ class DashboardController extends Controller
                 ->whereYear('created_at', Carbon::now()->subMonth()->year)
                 ->count();
 
-            // --- Hitung persentase perubahan ---
             if ($closedLastMonth === 0) {
-                $changePercent = null; // Bisa tampilkan N/A
+                $changePercent = null;
                 $trend = 'steady';
             } else {
                 $changePercent = round((($closedThisMonth - $closedLastMonth) / $closedLastMonth) * 100, 1);
@@ -56,11 +51,10 @@ class DashboardController extends Controller
                 $changePercent .= '%';
             }
 
-            // --- Data statistik ---
             $stats = [
                 [
                     'title' => 'Total Tickets',
-                    'value' => $totalTickets, // tetap total semua tiket
+                    'value' => $totalTickets,
                     'icon' => 'ticket',
                     'trend' => $trend,
                     'change' => $changePercent
@@ -85,7 +79,6 @@ class DashboardController extends Controller
                 ],
             ];
 
-            // Tentukan view sesuai role
             $viewPath = $user->role === 'Admin'
                 ? 'dashboards.admin.index'
                 : 'dashboards.manager.index';
@@ -105,7 +98,7 @@ class DashboardController extends Controller
             ));
         }
 
-        // Views untuk role lainnya
+        // 🔹 Views untuk role lain
         $roleViews = [
             'Client' => 'dashboards.client.index',
             'Developer' => 'dashboards.developer.index',
@@ -116,6 +109,25 @@ class DashboardController extends Controller
             abort(403, 'Unauthorized role.');
         }
 
+        // 🔹 Dashboard Client
+        if ($user->role === 'Client') {
+            $tickets = Ticket::where('user_id', $user->id)
+                ->orderByDesc('created_at')
+                ->get();
+
+            $openTickets = Ticket::where('user_id', $user->id)->where('status', 'Open')->count();
+            $closedTickets = Ticket::where('user_id', $user->id)->where('status', 'Closed')->count();
+            $totalTickets = Ticket::where('user_id', $user->id)->count();
+
+            return view($roleViews[$user->role], compact(
+                'tickets',
+                'openTickets',
+                'closedTickets',
+                'totalTickets'
+            ));
+        }
+
+        // 🔹 Untuk Developer & QA (sementara hanya view kosong)
         return view($roleViews[$user->role]);
     }
 }

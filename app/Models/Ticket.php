@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Ticket extends Model
 {
     protected $fillable = [
+        'user_id',
         'name',
         'email',
         'topic',
@@ -17,7 +19,7 @@ class Ticket extends Model
         'status',
         'ticket_number',
         'project_id',
-        'developer_id', // tambahkan developer_id
+        'developer_id',
     ];
 
     public function getRouteKeyName()
@@ -37,29 +39,39 @@ class Ticket extends Model
             } while (self::where('ticket_number', $ticketNumber)->exists());
 
             $ticket->ticket_number = $ticketNumber;
+
+            // otomatis isi user_id kalau login
+            if (Auth::check()) {
+                $ticket->user_id = Auth::id();
+            }
         });
     }
 
-    // ➕ Relasi ke Project
+    // Relasi ke User (Client yang buat ticket)
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    // Relasi ke Project
     public function project()
     {
         return $this->belongsTo(Project::class);
     }
 
-    // ➕ Relasi ke Developer
+    // Relasi ke Developer
     public function developer()
     {
         return $this->belongsTo(User::class, 'developer_id');
     }
 
     public function histories()
-{
-    return $this->hasMany(TicketHistory::class);
-}
+    {
+        return $this->hasMany(TicketHistory::class);
+    }
 
-    public function comments() {
-    return $this->hasMany(Comment::class);
-}
-
-
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 }

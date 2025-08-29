@@ -6,11 +6,14 @@ use App\Models\Ticket;
 use App\Models\User;
 use App\Models\Project;
 use App\Models\TicketHistory;
+use App\Models\Client;
+use App\Models\Employee; // ✅ Tambahkan
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use App\Mail\TicketCreated;
+use App\Services\FonnteService;
 
 class TicketController extends Controller
 {
@@ -20,7 +23,6 @@ class TicketController extends Controller
      * ======================================================
      */
 
-    // List semua tiket (admin/PM)
     public function index(Request $request)
     {
         $query = Ticket::with(['project', 'developer']);
@@ -52,7 +54,6 @@ class TicketController extends Controller
         return view('tickets.index', compact('tickets', 'projects'));
     }
 
-    // Detail tiket Admin/PM
     public function show(Ticket $ticket)
     {
         if (Auth::user()->role === 'Developer' && $ticket->developer_id !== Auth::id()) {
@@ -62,7 +63,6 @@ class TicketController extends Controller
         return view('tickets.show', compact('ticket'));
     }
 
-    // Update tiket
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -100,7 +100,6 @@ class TicketController extends Controller
         return back()->with('success', 'Tiket berhasil diperbarui.');
     }
 
-    // Hapus tiket
     public function destroy(Request $request, $id)
     {
         $ticket = Ticket::findOrFail($id);
@@ -122,7 +121,6 @@ class TicketController extends Controller
                          ->with('success', 'Tiket berhasil dihapus.');
     }
 
-    // Tampilan semua project beserta tiketnya
     public function projectTickets(Request $request)
     {
         $projects = Project::with(['tickets' => function ($query) {
@@ -138,7 +136,6 @@ class TicketController extends Controller
      * ======================================================
      */
 
-    // Dashboard Client
     public function clientDashboard()
     {
         $userEmail = Auth::user()->email;
@@ -150,7 +147,6 @@ class TicketController extends Controller
         return view('dashboards.client.index', compact('openCount', 'inProgressCount', 'closedCount'));
     }
 
-    // Halaman buat tiket baru (Client)
     public function create()
     {
         $projects = Project::all();
@@ -159,7 +155,6 @@ class TicketController extends Controller
         return view('dashboards.client.tickets.create', compact('projects', 'developers'));
     }
 
-    // Simpan tiket baru (Client)
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -189,13 +184,64 @@ class TicketController extends Controller
             'description' => 'Ticket created with title: ' . $ticket->title,
         ]);
 
+        /**
+         * ======================================================
+         *            KIRIM WHATSAPP VIA FONNTE
+         * ======================================================
+         */
+        $fonnte = app(FonnteService::class);
+
+        // 1️⃣ Jika dibuat oleh user login
+        $user = Auth::user();
+        if ($user && !empty($user->phone)) {
+            $message = "Halo {$user->name}, tiket Anda berhasil dibuat!\n\n".
+                       "ID Ticket: {$ticket->ticket_number}\n".
+                       "Judul: {$ticket->title}\n".
+                       "Status: {$ticket->status}\n\n".
+                       "Kami akan segera memproses tiket Anda. Terima kasih.";
+            $fonnte->sendMessage($user->phone, $message);
+        }
+
+        // 2️⃣ Jika dibuat oleh client (tabel clients)
+        $client = Client::where('email', $data['email'])->first();
+        if ($client && !empty($client->nohp)) {
+            $message = "Halo {$client->full_name}, tiket Anda berhasil dibuat!\n\n".
+                       "ID Ticket: {$ticket->ticket_number}\n".
+                       "Judul: {$ticket->title}\n".
+                       "Status: {$ticket->status}\n\n".
+                       "Kami akan segera memproses tiket Anda. Terima kasih.";
+            $fonnte->sendMessage($client->nohp, $message);
+        }
+
+        // 3️⃣ Notifikasi ke Project Manager (dari employees)
+        $projectManagers = Employee::where('role', 'Project Manager')->where('status', 'Active')->get();
+        foreach ($projectManagers as $pm) {
+            if (!empty($pm->phone)) {
+                $pmMessage = "📢 Ticket Baru dari Client\n\n".
+                             "Nama: {$ticket->name}\n".
+                             "Email: {$ticket->email}\n".
+                             "Judul: {$ticket->title}\n".
+                             "ID Ticket: {$ticket->ticket_number}\n".
+                             "Status: {$ticket->status}\n\n".
+                             "Mohon segera ditindaklanjuti.";
+                $fonnte->sendMessage($pm->phone, $pmMessage);
+            }
+        }
+
+        /**
+         * ======================================================
+         *            KIRIM EMAIL NOTIFIKASI
+         * ======================================================
+         */
         $recipients = [$data['email']];
-        $pmEmails = User::where('role', 'Project Manager')->pluck('email')->toArray();
+        $pmEmails = Employee::where('role', 'Project Manager')->pluck('email')->toArray();
         $recipients = array_merge($recipients, $pmEmails);
 
         if (!empty($data['developer_id'])) {
             $developer = User::find($data['developer_id']);
-            if ($developer) $recipients[] = $developer->email;
+            if ($developer) {
+                $recipients[] = $developer->email;
+            }
         }
 
         foreach ($recipients as $recipient) {
@@ -203,10 +249,9 @@ class TicketController extends Controller
         }
 
         return redirect()->route('client.tickets.create')
-                         ->with('success', 'Tiket berhasil dibuat dan email telah dikirim.');
+                         ->with('success', 'Tiket berhasil dibuat. Notifikasi telah dikirim.');
     }
 
-    // Detail tiket Client berdasarkan ticket_number
     public function showClientTicket($ticket_number)
     {
         $ticket = Ticket::where('ticket_number', $ticket_number)
@@ -221,7 +266,6 @@ class TicketController extends Controller
         return view('dashboards.client.tickets.show', compact('ticket', 'history'));
     }
 
-    // History tiket milik client yang sedang login
     public function history()
     {
         $userEmail = Auth::user()->email;

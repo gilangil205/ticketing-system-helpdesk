@@ -5,7 +5,6 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TicketController;
-use Illuminate\Support\Facades\Auth;
 
 // Redirect root ke login
 Route::get('/', fn () => redirect()->route('login'));
@@ -17,7 +16,7 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-   Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
+    Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
 
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -32,5 +31,5 @@ require __DIR__.'/developer.php';
 require __DIR__.'/manager.php';
 require __DIR__.'/qa.php';
 
-// Route auth dari Laravel Breeze/Jetstream
+// Route auth
 require __DIR__.'/auth.php';

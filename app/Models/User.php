@@ -19,6 +19,7 @@ class User extends Authenticatable
         'rate',
         'role',
         'last_login', // ✅ pastikan ini sesuai dengan nama kolom di tabel database
+        'phone', // ✅ tambahkan
     ];
 
     protected $hidden = [
