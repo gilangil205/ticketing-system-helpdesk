@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Models\Project;
 use App\Models\TicketHistory;
 use App\Models\Client;
-use App\Models\Employee; // ✅ Tambahkan
+use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -51,7 +51,10 @@ class TicketController extends Controller
         $tickets = $query->orderBy('created_at', 'desc')->paginate(10);
         $projects = Project::all();
 
-        return view('tickets.index', compact('tickets', 'projects'));
+        // 🔑 Ambil daftar developer dari tabel users (sesuai migration add_developer_id -> users)
+        $employees = User::where('role', 'Developer')->get();
+
+        return view('tickets.index', compact('tickets', 'projects', 'employees'));
     }
 
     public function show(Ticket $ticket)
@@ -184,14 +187,8 @@ class TicketController extends Controller
             'description' => 'Ticket created with title: ' . $ticket->title,
         ]);
 
-        /**
-         * ======================================================
-         *            KIRIM WHATSAPP VIA FONNTE
-         * ======================================================
-         */
+        // Fonnte & email notifs (tetap seperti sebelumnya)
         $fonnte = app(FonnteService::class);
-
-        // 1️⃣ Jika dibuat oleh user login
         $user = Auth::user();
         if ($user && !empty($user->phone)) {
             $message = "Halo {$user->name}, tiket Anda berhasil dibuat!\n\n".
@@ -202,7 +199,6 @@ class TicketController extends Controller
             $fonnte->sendMessage($user->phone, $message);
         }
 
-        // 2️⃣ Jika dibuat oleh client (tabel clients)
         $client = Client::where('email', $data['email'])->first();
         if ($client && !empty($client->nohp)) {
             $message = "Halo {$client->full_name}, tiket Anda berhasil dibuat!\n\n".
@@ -213,7 +209,6 @@ class TicketController extends Controller
             $fonnte->sendMessage($client->nohp, $message);
         }
 
-        // 3️⃣ Notifikasi ke Project Manager (dari employees)
         $projectManagers = Employee::where('role', 'Project Manager')->where('status', 'Active')->get();
         foreach ($projectManagers as $pm) {
             if (!empty($pm->phone)) {
@@ -228,11 +223,6 @@ class TicketController extends Controller
             }
         }
 
-        /**
-         * ======================================================
-         *            KIRIM EMAIL NOTIFIKASI
-         * ======================================================
-         */
         $recipients = [$data['email']];
         $pmEmails = Employee::where('role', 'Project Manager')->pluck('email')->toArray();
         $recipients = array_merge($recipients, $pmEmails);
@@ -302,5 +292,31 @@ class TicketController extends Controller
         $tickets = $query->orderBy('created_at', 'desc')->paginate(10);
 
         return view('dashboards.developer.tickets.index', compact('tickets'));
+    }
+
+    /**
+     * ======================================================
+     *          FITUR BARU: MOVE TICKET KE DEVELOPER
+     * ======================================================
+     */
+    public function moveToDeveloper(Request $request, Ticket $ticket)
+    {
+        $request->validate([
+            'developer_id' => 'required|exists:users,id'
+        ]);
+
+        $developer = User::findOrFail($request->developer_id);
+
+        $ticket->developer_id = $developer->id;
+        $ticket->save();
+
+        TicketHistory::create([
+            'ticket_id' => $ticket->id,
+            'user_id' => Auth::id(),
+            'action' => 'Moved',
+            'description' => 'Ticket moved to developer: ' . $developer->name,
+        ]);
+
+        return back()->with('success', 'Tiket berhasil dipindahkan ke ' . $developer->name);
     }
 }
