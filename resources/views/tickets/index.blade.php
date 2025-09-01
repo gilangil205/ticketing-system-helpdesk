@@ -177,6 +177,7 @@
                                                 <!-- Dropdown Action -->
                                                 <div class="relative">
                                                     <select onchange="handleAction(this, '{{ $ticket->ticket_number }}')" class="text-xs border border-gray-300 rounded px-2 py-1">
+                                                        <option value="">Actions</option>
                                                         <option value="move">Move To</option>
                                                     </select>
                                                 </div>
