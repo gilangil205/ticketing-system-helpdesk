@@ -50,11 +50,8 @@ class TicketController extends Controller
         $tickets  = $query->orderBy('created_at', 'desc')->paginate(10);
         $projects = Project::all();
 
-        // Ambil daftar developer dari tabel users (role = Developer)
-        $employees = User::where('role', 'Developer')
-            ->orderBy('full_name')
-            ->get();
-
+        // Ambil daftar developer
+        $employees = User::where('role', 'Developer')->orderBy('full_name')->get();
         $employees->each(function ($e) {
             if (!isset($e->name) || empty($e->name)) {
                 $e->name = $e->full_name ?? $e->username ?? null;
@@ -83,19 +80,11 @@ class TicketController extends Controller
         $ticket = Ticket::findOrFail($id);
 
         if (Auth::user()->role === 'Developer') {
-            if ($ticket->developer_id !== Auth::id()) {
-                abort(403, 'Anda tidak memiliki akses untuk memperbarui tiket ini.');
-            }
-            if ($request->has('status')) {
-                $ticket->status = $request->status;
-            }
+            if ($ticket->developer_id !== Auth::id()) abort(403);
+            if ($request->has('status')) $ticket->status = $request->status;
         } else {
-            if ($request->has('status')) {
-                $ticket->status = $request->status;
-            }
-            if ($request->has('priority')) {
-                $ticket->priority = $request->priority;
-            }
+            if ($request->has('status')) $ticket->status = $request->status;
+            if ($request->has('priority')) $ticket->priority = $request->priority;
         }
 
         $ticket->save();
@@ -136,7 +125,6 @@ class TicketController extends Controller
      *                BAGIAN PROJECT CRUD
      * ======================================================
      */
-
     public function projectTickets()
     {
         $projects = Project::with(['tickets' => function ($query) {
@@ -209,14 +197,9 @@ class TicketController extends Controller
         $client = Client::where('email', $user->email)->first();
         $projects = $client ? $client->projects : collect();
 
-        $employees = User::where('role', 'Developer')
-            ->orderBy('full_name')
-            ->get();
-
+        $employees = User::where('role', 'Developer')->orderBy('full_name')->get();
         $employees->each(function ($e) {
-            if (!isset($e->name) || empty($e->name)) {
-                $e->name = $e->full_name ?? $e->username ?? null;
-            }
+            if (!isset($e->name) || empty($e->name)) $e->name = $e->full_name ?? $e->username ?? null;
         });
 
         return view('dashboards.client.tickets.create', compact('projects', 'employees'));
@@ -254,7 +237,7 @@ class TicketController extends Controller
 
         $fonnte = app(FonnteService::class);
 
-        // Kirim notifikasi WA ke Client (Auth user)
+        // Kirim notifikasi WA & Email
         $user = Auth::user();
         if ($user && !empty($user->phone)) {
             $message = "Halo {$user->full_name}, tiket Anda berhasil dibuat!\n\n".
@@ -262,11 +245,9 @@ class TicketController extends Controller
                        "Judul: {$ticket->title}\n".
                        "Status: {$ticket->status}\n\n".
                        "Kami akan segera memproses tiket Anda. Terima kasih.";
-
             $fonnte->sendMessage($user->phone, $message);
         }
 
-        // Kirim notifikasi WA ke Client (dari model Client)
         $client = Client::where('email', $data['email'])->first();
         if ($client && !empty($client->nohp)) {
             $message = "Halo {$client->full_name}, tiket Anda berhasil dibuat!\n\n".
@@ -274,11 +255,10 @@ class TicketController extends Controller
                        "Judul: {$ticket->title}\n".
                        "Status: {$ticket->status}\n\n".
                        "Kami akan segera memproses tiket Anda. Terima kasih.";
-
             $fonnte->sendMessage($client->nohp, $message);
         }
 
-        // Kirim notifikasi WA ke semua Project Manager
+        // Notifikasi Project Manager
         $projectManagers = User::where('role', 'Project Manager')->get();
         foreach ($projectManagers as $pm) {
             if (!empty($pm->phone)) {
@@ -289,21 +269,17 @@ class TicketController extends Controller
                              "ID Ticket: {$ticket->ticket_number}\n".
                              "Status: {$ticket->status}\n\n".
                              "Mohon segera ditindaklanjuti.";
-
                 $fonnte->sendMessage($pm->phone, $pmMessage);
             }
         }
 
-        // Email notifikasi
         $recipients = [$data['email']];
         $pmEmails   = User::where('role', 'Project Manager')->pluck('email')->toArray();
         $recipients = array_merge($recipients, $pmEmails);
 
         if (!empty($data['developer_id'])) {
             $developer = User::find($data['developer_id']);
-            if ($developer) {
-                $recipients[] = $developer->email;
-            }
+            if ($developer) $recipients[] = $developer->email;
         }
 
         foreach ($recipients as $recipient) {
@@ -352,13 +328,8 @@ class TicketController extends Controller
         $query = Ticket::with(['project', 'developer'])
             ->where('developer_id', $developerId);
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('priority')) {
-            $query->where('priority', $request->priority);
-        }
+        if ($request->filled('status')) $query->where('status', $request->status);
+        if ($request->filled('priority')) $query->where('priority', $request->priority);
 
         $tickets = $query->orderBy('created_at', 'desc')->paginate(10);
 
@@ -377,7 +348,6 @@ class TicketController extends Controller
         ]);
 
         $developer = User::where('role', 'Developer')->findOrFail($request->developer_id);
-
         $ticket->developer_id = $developer->id;
         $ticket->save();
 
@@ -400,9 +370,7 @@ class TicketController extends Controller
 
             $fonnte->sendMessage($developer->phone, $message);
         } else {
-            Log::warning("Developer tidak punya nomor WA", [
-                'developer_id' => $developer->id,
-            ]);
+            Log::warning("Developer tidak punya nomor WA", ['developer_id' => $developer->id]);
         }
 
         return back()->with('success', 'Tiket berhasil dipindahkan ke ' . ($developer->full_name ?? $developer->username ?? $developer->id));
