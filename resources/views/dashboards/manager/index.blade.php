@@ -1,6 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        @section('title', 'Dashboard Manager')
+        @section('title', 'Dashboard Admin')
+        <h2 class="text-xl font-semibold text-gray-800 leading-tight">
+            Admin Dashboard
+        </h2>
     </x-slot>
 
     <div class="py-4">
