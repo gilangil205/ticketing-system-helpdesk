@@ -18,8 +18,8 @@ class User extends Authenticatable
         'full_name',
         'rate',
         'role',
-        'last_login', // ✅ pastikan ini sesuai dengan nama kolom di tabel database
-        'phone', // ✅ tambahkan
+        'last_login',
+        'phone',
     ];
 
     protected $hidden = [
@@ -29,33 +29,14 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'last_login' => 'datetime', // ✅ casting datetime untuk memudahkan format tanggal
+        'last_login' => 'datetime',
         'rate' => 'decimal:2',
     ];
 
     // ✅ Helper methods untuk cek role
-    public function isAdmin()
-    {
-        return $this->role === 'Admin';
-    }
-
-    public function isClient()
-    {
-        return $this->role === 'Client';
-    }
-
-    public function isDeveloper()
-    {
-        return $this->role === 'Developer';
-    }
-
-    public function isProjectManager()
-    {
-        return $this->role === 'Project Manager';
-    }
-
-    public function isQAMaster()
-    {
-        return $this->role === 'QA Master';
-    }
+    public function isAdmin()      { return $this->role === 'Admin'; }
+    public function isClient()     { return $this->role === 'Client'; }
+    public function isDeveloper()  { return $this->role === 'Developer'; }
+    public function isProjectManager() { return $this->role === 'Project Manager'; }
+    public function isQAMaster()   { return $this->role === 'QA Master'; }
 }

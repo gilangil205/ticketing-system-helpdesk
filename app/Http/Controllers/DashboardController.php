@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use App\Models\User;
 use App\Models\Ticket;
+use App\Models\Project;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
@@ -127,7 +128,36 @@ class DashboardController extends Controller
             ));
         }
 
-        // 🔹 Untuk Developer & QA (sementara hanya view kosong)
+        // 🔹 Dashboard Developer
+        if ($user->role === 'Developer') {
+            $developerId = $user->id;
+
+            $activeProjects = Project::whereHas('tickets', function ($q) use ($developerId) {
+                $q->where('developer_id', $developerId);
+            })->count();
+
+            $inProgressTickets = Ticket::where('developer_id', $developerId)
+                ->where('status', 'In Progress')
+                ->count();
+
+            $completedTickets = Ticket::where('developer_id', $developerId)
+                ->where('status', 'Closed')
+                ->count();
+
+            $recentTickets = Ticket::where('developer_id', $developerId)
+                ->orderBy('created_at', 'desc')
+                ->take(5)
+                ->get();
+
+            return view($roleViews[$user->role], compact(
+                'activeProjects',
+                'inProgressTickets',
+                'completedTickets',
+                'recentTickets'
+            ));
+        }
+
+        // 🔹 Dashboard QA Master (sementara kosong)
         return view($roleViews[$user->role]);
     }
 }

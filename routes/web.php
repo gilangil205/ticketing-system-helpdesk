@@ -18,8 +18,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
 
-    // Move route — gunakan method moveToDeveloper di controller
-    Route::post('/tickets/{ticket}/move', [TicketController::class, 'moveToDeveloper'])->name('tickets.move');
+    // Route Move Ticket → gunakan method move()
+    Route::post('/tickets/{ticket}/move', [TicketController::class, 'move'])->name('tickets.move');
 
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

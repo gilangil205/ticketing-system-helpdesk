@@ -8,7 +8,7 @@ use App\Http\Controllers\TicketController;
 
 Route::middleware([
     'auth',
-    RoleMiddleware::class . ':Admin,Project Manager'
+    RoleMiddleware::class . ':Admin,Project Manager, Developer, QA Master'
 ])->group(function () {
     // Management Client
     Route::resource('clients', ClientController::class);
