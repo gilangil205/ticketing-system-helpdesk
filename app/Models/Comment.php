@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Comment extends Model
 {
-    protected $fillable = ['ticket_id', 'user_id', 'body'];
+    protected $fillable = ['ticket_id', 'user_id', 'body', 'file_path'];
 
     public function user() {
         return $this->belongsTo(User::class);
@@ -16,4 +16,5 @@ class Comment extends Model
         return $this->belongsTo(Ticket::class);
     }
 }
+
 

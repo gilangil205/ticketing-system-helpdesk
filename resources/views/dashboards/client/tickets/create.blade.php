@@ -24,7 +24,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('tickets.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('client.tickets.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -52,10 +52,10 @@
                         <select id="topic" name="topic"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                             <option value="">Select a topic</option>
-                            <option value="Bug Report">Bug Report</option>
-                            <option value="Feature Request">Feature Request</option>
-                            <option value="Technical Support">Technical Support</option>
-                            <option value="Account Issue">Account Issue</option>
+                            <option value="Bug Report" {{ old('topic') == 'Bug Report' ? 'selected' : '' }}>Bug Report</option>
+                            <option value="Feature Request" {{ old('topic') == 'Feature Request' ? 'selected' : '' }}>Feature Request</option>
+                            <option value="Technical Support" {{ old('topic') == 'Technical Support' ? 'selected' : '' }}>Technical Support</option>
+                            <option value="Account Issue" {{ old('topic') == 'Account Issue' ? 'selected' : '' }}>Account Issue</option>
                         </select>
                     </div>
 
@@ -74,12 +74,12 @@
                         <select id="project_id" name="project_id"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                             <option value="">-- Select Project --</option>
-                            @foreach ($projects as $project)
+                           @foreach ($projects as $project)
                                 <option value="{{ $project->id }}" {{ old('project_id') == $project->id ? 'selected' : '' }}>
                                     {{ $project->name }}
                                 </option>
-                                
                             @endforeach
+
                         </select>
                     </div>
                 </div>
@@ -90,7 +90,9 @@
                         <h3 class="card-title text-lg font-medium">Description</h3>
                     </div>
                     <div class="card-body">
-                        <div id="quill-editor" style="min-height: 200px;" class="bg-white"></div>
+                        <div id="quill-editor" style="min-height: 200px;" class="bg-white">
+                            {!! old('description') !!}
+                        </div>
                         <input type="hidden" name="description" id="description">
                     </div>
                 </div>
@@ -152,6 +154,9 @@
                     theme: 'snow',
                     placeholder: 'Write something...'
                 });
+
+                // Set initial value from old input
+                quill.root.innerHTML = document.getElementById('description').value;
 
                 quill.on('text-change', function () {
                     document.getElementById('description').value = quill.root.innerHTML;

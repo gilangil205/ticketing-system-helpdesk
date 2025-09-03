@@ -65,19 +65,28 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($employees as $employee)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-4 whitespace-nowrap">
+                              <td class="px-4 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
-                                        @if($employee->profile_photo)
-                                        <div class="flex-shrink-0 h-10 w-10">
-                                            <img class="h-10 w-10 rounded-full object-cover" src="{{ asset('storage/'.$employee->profile_photo) }}" alt="{{ $employee->username }}">
-                                        </div>
+                                        @php
+                                            // Ambil path dari database
+                                            $profilePath = $employee->profile_photo;
+
+                                            // Cek apakah file ada di storage/public
+                                            $hasPhoto = $profilePath && \Illuminate\Support\Facades\Storage::disk('public')->exists($profilePath);
+                                        @endphp
+
+                                        @if($hasPhoto)
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <img class="h-10 w-10 rounded-full object-cover" src="{{ \Illuminate\Support\Facades\Storage::url($profilePath) }}" alt="{{ $employee->username }}">
+                                            </div>
                                         @else
-                                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                            </svg>
-                                        </div>
+                                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                                </svg>
+                                            </div>
                                         @endif
+
                                         <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900">{{ $employee->name }}</div>
                                             <div class="text-xs text-gray-500 sm:hidden">{{ $employee->username }}</div>
@@ -85,6 +94,7 @@
                                         </div>
                                     </div>
                                 </td>
+
                                 <td class="px-4 py-4 hidden sm:table-cell">{{ $employee->username }}</td>
                                 <td class="px-4 py-4 hidden md:table-cell">
                                     <div class="text-sm text-gray-900">{{ $employee->nik }}</div>

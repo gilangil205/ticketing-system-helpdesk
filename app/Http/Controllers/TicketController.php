@@ -50,8 +50,6 @@ class TicketController extends Controller
 
         $tickets = $query->orderBy('created_at', 'desc')->paginate(10);
         $projects = Project::all();
-
-        // 🔑 Ambil daftar developer dari tabel users (sesuai migration add_developer_id -> users)
         $employees = User::where('role', 'Developer')->get();
 
         return view('tickets.index', compact('tickets', 'projects', 'employees'));
@@ -124,13 +122,60 @@ class TicketController extends Controller
                          ->with('success', 'Tiket berhasil dihapus.');
     }
 
-    public function projectTickets(Request $request)
+    /**
+     * ======================================================
+     *                BAGIAN PROJECT CRUD
+     * ======================================================
+     */
+
+    public function projectTickets()
     {
         $projects = Project::with(['tickets' => function ($query) {
             $query->orderBy('created_at', 'desc');
         }])->get();
 
-        return view('dashboards.admin.projects.index', compact('projects'));
+        $clients = Client::all();
+
+        return view('dashboards.admin.projects.index', compact('projects', 'clients'));
+    }
+
+    public function storeProject(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'client_id' => 'nullable|exists:clients,id',
+        ]);
+
+        Project::create([
+            'name' => $request->name,
+            'client_id' => $request->client_id ?? null,
+        ]);
+
+        return redirect()->back()->with('success', 'Project berhasil ditambahkan!');
+    }
+
+    public function destroyProject($id)
+    {
+        $project = Project::with('tickets')->findOrFail($id);
+
+        foreach ($project->tickets as $ticket) {
+            if ($ticket->attachment && Storage::disk('public')->exists($ticket->attachment)) {
+                Storage::disk('public')->delete($ticket->attachment);
+            }
+
+            TicketHistory::create([
+                'ticket_id' => $ticket->id,
+                'user_id' => Auth::id(),
+                'action' => 'Deleted',
+                'description' => 'Ticket "' . $ticket->title . '" deleted because its project was deleted.',
+            ]);
+
+            $ticket->delete();
+        }
+
+        $project->delete();
+
+        return redirect()->route('projects')->with('success', 'Project beserta semua tiket terkait berhasil dihapus.');
     }
 
     /**
@@ -152,7 +197,14 @@ class TicketController extends Controller
 
     public function create()
     {
-        $projects = Project::all();
+        $user = Auth::user();
+
+        // Ambil client berdasarkan email login
+        $client = Client::where('email', $user->email)->first();
+
+        // Ambil project client ini
+        $projects = $client ? $client->projects : collect();
+
         $developers = User::where('role', 'Developer')->get();
 
         return view('dashboards.client.tickets.create', compact('projects', 'developers'));
@@ -187,7 +239,7 @@ class TicketController extends Controller
             'description' => 'Ticket created with title: ' . $ticket->title,
         ]);
 
-        // Fonnte & email notifs (tetap seperti sebelumnya)
+        // Kirim notifikasi Fonnte & Email
         $fonnte = app(FonnteService::class);
         $user = Auth::user();
         if ($user && !empty($user->phone)) {
@@ -294,11 +346,6 @@ class TicketController extends Controller
         return view('dashboards.developer.tickets.index', compact('tickets'));
     }
 
-    /**
-     * ======================================================
-     *          FITUR BARU: MOVE TICKET KE DEVELOPER
-     * ======================================================
-     */
     public function moveToDeveloper(Request $request, Ticket $ticket)
     {
         $request->validate([

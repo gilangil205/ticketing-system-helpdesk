@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
+use App\Models\Project;
 
 class Client extends Model
 {
@@ -19,7 +20,7 @@ class Client extends Model
         'logo',
         'alamat',
         'nohp',
-        'status' // TAMBAHKAN INI
+        'status', // TAMBAHKAN INI
     ];
 
     protected $hidden = [
@@ -27,29 +28,46 @@ class Client extends Model
         'remember_token',
     ];
 
-    // Tambahkan untuk logging perubahan status
+    /**
+     * ======================================================
+     *              RELASI DENGAN PROJECT
+     * ======================================================
+     */
+    public function projects()
+    {
+        return $this->hasMany(Project::class, 'client_id');
+    }
+
+    /**
+     * ======================================================
+     *              LOGGING STATUS CLIENT
+     * ======================================================
+     */
     protected static function boot()
     {
         parent::boot();
 
-        static::updating(function($client) {
+        static::updating(function ($client) {
             if ($client->isDirty('status')) {
                 Log::info('Client Status Changing', [
                     'client_id' => $client->id,
                     'from' => $client->getOriginal('status'),
-                    'to' => $client->status
+                    'to' => $client->status,
                 ]);
             }
         });
     }
 
-    // Accessor untuk status (opsional)
+    /**
+     * ======================================================
+     *              ACCESSOR & MUTATOR STATUS
+     * ======================================================
+     */
     public function getStatusAttribute($value)
     {
         return ucfirst(strtolower($value));
     }
 
-    // Mutator untuk status (opsional)
     public function setStatusAttribute($value)
     {
         $this->attributes['status'] = ucfirst(strtolower($value));
