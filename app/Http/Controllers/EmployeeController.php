@@ -64,15 +64,18 @@ class EmployeeController extends Controller
             $validated['profile_photo'] = $request->file('profile_photo')->store('profile-photos', 'public');
         }
 
+        // Simpan ke tabel employees
         $employee = Employee::create([
             ...$validated,
             'password' => bcrypt($validated['password']),
         ]);
 
+        // Simpan juga ke tabel users (supaya bisa login & punya nomor WA)
         User::create([
             'full_name' => $validated['name'],
             'username' => $validated['username'],
             'email' => $validated['email'],
+            'phone' => $validated['phone'], // ✅ simpan phone ke users
             'password' => bcrypt($validated['password']),
             'role' => $validated['role'],
             'email_verified_at' => now(),
@@ -125,6 +128,7 @@ class EmployeeController extends Controller
             $validated['profile_photo'] = $request->file('profile_photo')->store('profile-photos', 'public');
         }
 
+        // Update employee
         $employee->update($validated);
 
         // Sinkronisasi ke tabel users jika ada
@@ -133,6 +137,7 @@ class EmployeeController extends Controller
             $user->full_name = $validated['name'];
             $user->username = $validated['username'];
             $user->email = $validated['email'];
+            $user->phone = $validated['phone']; // ✅ update phone di users
             $user->role = $validated['role'];
             if (isset($validated['password'])) {
                 $user->password = $validated['password'];
@@ -143,21 +148,20 @@ class EmployeeController extends Controller
         return redirect()->route('employees.index')->with('success', 'Employee updated successfully.');
     }
 
-   public function destroy(Employee $employee)
-{
-    if ($employee->profile_photo) {
-        Storage::disk('public')->delete($employee->profile_photo);
+    public function destroy(Employee $employee)
+    {
+        if ($employee->profile_photo) {
+            Storage::disk('public')->delete($employee->profile_photo);
+        }
+
+        // Hapus user yang berkaitan
+        $user = User::where('email', $employee->email)->first();
+        if ($user) {
+            $user->delete();
+        }
+
+        $employee->delete();
+
+        return redirect()->route('employees.index')->with('success', 'Employee deleted successfully.');
     }
-
-    // Hapus user yang berkaitan
-    $user = User::where('email', $employee->email)->first();
-    if ($user) {
-        $user->delete();
-    }
-
-    $employee->delete();
-
-    return redirect()->route('employees.index')->with('success', 'Employee deleted successfully.');
-}
-
 }

@@ -8,7 +8,7 @@ use App\Http\Middleware\RoleMiddleware;
 
 Route::middleware([
     'auth',
-    RoleMiddleware::class . ':Admin,Project Manager'
+    RoleMiddleware::class . ':Admin,Project Manager, Developer, QA Master'
 ])->group(function () {
 
     // ----------------------------

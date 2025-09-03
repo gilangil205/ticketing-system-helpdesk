@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Project;
+use App\Models\Employee;
 
 class Ticket extends Model
 {
@@ -65,7 +66,7 @@ class Ticket extends Model
         return $this->belongsTo(Project::class);
     }
 
-    // Relasi ke Developer — developer disimpan di tabel users (developer_id -> users.id)
+    // ✅ Relasi ke Developer (Employee, bukan User)
     public function developer()
     {
         return $this->belongsTo(User::class, 'developer_id');
