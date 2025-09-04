@@ -29,7 +29,8 @@ class TicketController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', '%' . $search . '%')
+                $q->where('ticket_number', 'like', '%' . $search . '%')
+                  ->orWhere('title', 'like', '%' . $search . '%')
                   ->orWhere('name', 'like', '%' . $search . '%')
                   ->orWhere('email', 'like', '%' . $search . '%');
             });
@@ -50,7 +51,6 @@ class TicketController extends Controller
         $tickets  = $query->orderBy('created_at', 'desc')->paginate(10);
         $projects = Project::all();
 
-        // Ambil daftar developer
         $employees = User::where('role', 'Developer')->orderBy('full_name')->get();
         $employees->each(function ($e) {
             if (!isset($e->name) || empty($e->name)) {
@@ -327,6 +327,17 @@ class TicketController extends Controller
 
         $query = Ticket::with(['project', 'developer'])
             ->where('developer_id', $developerId);
+
+        // Tambahkan pencarian berdasarkan nomor tiket, judul, nama, atau email
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('ticket_number', 'like', '%' . $search . '%')
+                  ->orWhere('title', 'like', '%' . $search . '%')
+                  ->orWhere('name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%');
+            });
+        }
 
         if ($request->filled('status')) $query->where('status', $request->status);
         if ($request->filled('priority')) $query->where('priority', $request->priority);
