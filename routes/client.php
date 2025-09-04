@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\ClientPasswordController;
 
 Route::middleware(['auth', RoleMiddleware::class . ':Client'])->group(function () {
 
@@ -28,5 +29,11 @@ Route::middleware(['auth', RoleMiddleware::class . ':Client'])->group(function (
         // Show ticket berdasarkan ticket_number
         Route::get('/{ticket_number}', [TicketController::class, 'showClientTicket'])
             ->name('show');
+    });
+
+    // Password (Ganti Password)
+    Route::prefix('client/password')->name('client.password.')->group(function () {
+        Route::get('/change', [ClientPasswordController::class, 'edit'])->name('change');
+        Route::post('/change', [ClientPasswordController::class, 'update'])->name('update');
     });
 });

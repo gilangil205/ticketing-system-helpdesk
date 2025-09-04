@@ -8,6 +8,7 @@
     <title>@yield('title', config('app.name', 'IT Support Center'))</title>
     @stack('styles')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="//unpkg.com/alpinejs" defer></script>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
