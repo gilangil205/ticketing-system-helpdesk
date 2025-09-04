@@ -179,7 +179,7 @@
                         <button 
             onclick="openMoveModal('{{ $ticket->ticket_number }}')" 
             class="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
-            Move
+            Send to
         </button>
                                         </div>
                                     </td>
@@ -215,7 +215,7 @@
                 </div>
                 <div class="flex justify-end space-x-2">
                     <button type="button" onclick="closeMoveModal()" class="px-4 py-2 bg-gray-300 rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Move</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Send</button>
                 </div>
             </form>
         </div>
