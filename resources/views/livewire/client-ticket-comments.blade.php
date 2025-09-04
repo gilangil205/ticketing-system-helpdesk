@@ -1,12 +1,14 @@
-<div class="border border-gray-200 rounded-lg overflow-hidden mt-6">
+<div class="border border-gray-200 rounded-lg overflow-hidden mt-6 flex flex-col h-[70vh]">
+    <!-- Header -->
     <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
         <h4 class="text-sm font-medium text-gray-700">Percakapan Client</h4>
     </div>
 
     <!-- Daftar Komentar -->
-    <div class="p-4 space-y-4 max-h-64 overflow-y-auto">
+    <div class="p-4 space-y-4 flex-1 overflow-y-auto" id="client-comments-container">
         @forelse ($comments as $comment)
             <div class="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg">
+                <!-- Avatar -->
                 <div class="flex-shrink-0">
                     @if(!empty($comment->user->profile_photo))
                         <img src="{{ asset('storage/' . $comment->user->profile_photo) }}" 
@@ -19,13 +21,14 @@
                     @endif
                 </div>
 
+                <!-- Isi Komentar -->
                 <div class="flex-1">
                     <div class="flex justify-between items-center mb-1">
                         <span class="font-medium text-gray-800">
                             {{ $comment->user->full_name ?? $comment->user->name ?? 'User' }}
                         </span>
                         <span class="text-gray-500 text-xs">
-                            {{ $comment->created_at->diffForHumans() }}
+                            {{ $comment->created_at->timezone('Asia/Jakarta')->format('d-m-Y h:i a') }}
                         </span>
                     </div>
                     <p class="text-gray-700 text-sm">{{ $comment->body }}</p>
@@ -48,7 +51,7 @@
 
     <!-- Form Tambah Komentar -->
     <div class="border-t border-gray-200 px-4 py-3">
-        <form wire:submit.prevent="submitComment" class="flex flex-col space-y-2" enctype="multipart/form-data">
+        <form wire:submit.prevent="submitComment" class="flex flex-col space-y-3" enctype="multipart/form-data">
             <input type="text" wire:model.defer="commentText" 
                 placeholder="Tulis komentar Anda..."
                 class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -71,3 +74,14 @@
         </form>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    Livewire.on('commentAdded', () => {
+        const container = document.getElementById('client-comments-container');
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+    });
+</script>
+@endpush

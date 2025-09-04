@@ -41,15 +41,21 @@ class TicketComments extends Component
             'file_path' => $filePath,
         ]);
 
+        // Kosongkan input setelah terkirim
         $this->reset(['commentText', 'file']);
 
+        // Trigger JS event untuk auto scroll ke bawah
         $this->dispatch('commentAdded');
     }
 
     public function render()
     {
-        $comments = $this->ticket->comments()->with('user')->latest()->get();
+        // Ambil komentar terbaru duluan
+        $comments = $this->ticket->comments()
+            ->with('user')
+            ->latest()
+            ->get();
+
         return view('livewire.ticket-comments', compact('comments'));
     }
 }
-
