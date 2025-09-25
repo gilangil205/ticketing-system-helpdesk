@@ -83,7 +83,7 @@
             class="group menu-item flex items-center px-4 py-3 text-base font-medium rounded-lg {{ request()->routeIs('projects.index') ? 'text-white bg-blue-700 shadow' : 'text-blue-100' }}">
                 <div class="flex items-center w-full transition-colors duration-200">
                     <i class="fas fa-project-diagram w-5 h-5 mr-3 {{ request()->routeIs('projects.index') ? 'text-white' : 'text-blue-300' }}"></i>
-                    <span class="font-semibold">Projects</span>
+                    <span class="font-semibold">Manage Projects</span>
                     @if(request()->routeIs('projects.index')) 
                     <span class="ml-auto w-2 h-2 bg-blue-300 rounded-full"></span>
                     @endif

@@ -5,7 +5,6 @@
             Admin Dashboard
         </h2>
     </x-slot>
-
     <div class="py-4">
         <div class="mx-auto">
             <!-- Welcome Header -->
